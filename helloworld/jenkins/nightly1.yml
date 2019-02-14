@@ -1,0 +1,102 @@
+---
+constants:
+  alb_scheme: &alb_scheme internal
+  application: &application helloworld
+  base_url: &base_url helloworld.dev.int.proquest.com
+  cluster: &cluster devops-arn-format-testing
+  container_port: &container_port "80"
+  environment: &environment devl
+  group: &group pqis
+  health_check_codes: &health_check_codes 200-399
+  health_check_path: &health_check_path /
+  image: &image 365859773477.dkr.ecr.us-east-1.amazonaws.com/devops/helloworld:<%= getenv :release %>
+  owner: &owner devopsengineering@proquest.com
+  region: &region us-east-1
+  s3_bucket: &s3_bucket pq-devops
+  service_name: &service_name helloworld
+  stack_template: &stack_template docker/cloudformation/https_alb_with_dns.json
+  sub_environment: &sub_environment nightly1
+  system: &system devops.helloworld.webapp
+  task_name: &task_name helloworld
+jeeves:
+  APPLICATION_NAME: *application
+  CLUSTER: *cluster
+  ENVIRONMENT: *sub_environment
+  GROUP: *group
+  IMAGE_TAG: *image
+  OWNER: *owner
+  REGION: *region
+  S3_BUCKET: *s3_bucket
+  STACK_TEMPLATE: *stack_template
+  SYSTEM: *system
+  TEST_TAGS: "@helloworld"
+tags:
+  environment: *environment
+  owner: *owner
+  sub_environment: *sub_environment
+  system: *system
+  version: internal
+nimbus:
+  ALBScheme: *alb_scheme
+  AvailabilityZoneA: us-east-1a
+  AvailabilityZoneB: us-east-1c
+  BaseURL: *base_url
+  Environment: *sub_environment
+task:
+  family: *task_name
+  container_definitions:
+    -
+      command: ['nginx', '-c', '/etc/nginx/default.conf']
+      cpu: 256
+      environment:
+        -
+          name: ENVIRONMENT
+          value: dev
+      essential: true
+      image: *image
+      memory: 1024
+      mount_points:
+        -
+          source_volume: log_data
+          container_path: /var/log/nginx
+      name: *task_name
+      port_mappings:
+        -
+          container_port: *container_port
+          protocol: tcp
+  volumes:
+    -
+      name: log_data
+      host:
+        source_path: /ecs/logs/nightly1/helloworld
+service:
+  cluster: *cluster
+  deployment_configuration:
+    maximum_percent: 200
+    minimum_healthy_percent: 50
+  desired_count: 2
+  load_balancers:
+    -
+      container_name: *task_name
+      container_port: *container_port
+  placement_strategy:
+    -
+      type: spread
+      field: 'attribute:ecs.availability-zone'
+    -
+      type: spread
+      field: instanceId
+  role: ecsServiceRole
+  service_name: *service_name
+  task_definition: *task_name
+service_scaling_parameters:
+  cluster: *cluster
+  service_name: *service_name
+  max_cpu_utilization: 70
+  min_cpu_utilization: 10
+  max_memory_utilization: 70
+  min_memory_utilization: 40
+  max_containers: 2
+  min_containers: 2
+  scaling_threshold: 3
+  cooldown: 280

@@ -1,13 +1,19 @@
 pipeline {
   agent none
 
+  parameters {
+    string(name: 'RELEASE')
+    string(name: 'APPLICATION_REVISION')
+    string(name: 'APPLICATION_BRANCH')
+  }
+
   stages {
     stage('pre-build') {
       agent { 
         docker { image 'deployoryah' }
       }
       steps {
-        sh 'jeeves inject devops-helloworld-pipeline'
+        sh 'jeeves load project devops-helloworld-pipeline helloworld/jenkins/'
       }
     }
     stage('build-image') {
@@ -15,7 +21,8 @@ pipeline {
         docker { image 'busybox' }
       }
       steps {
-        echo 'Building Image'
+        sh 'firkin docker login --account pqis'
+        sh 'cd docker/hello_world && docker build --pull -t '
       }
     }
     stage('deploy') {

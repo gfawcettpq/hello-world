@@ -14,6 +14,7 @@ pipeline {
       }
       steps {
         sh 'jeeves load project devops-helloworld-pipeline helloworld/jenkins/nightly1.yml'
+        sh 'jeeves inject devops-helloworld-pipeline'
         sh 'jeeves inject devops-helloworld-pipeline --to_file env.vars'
         load 'env.vars'
       }

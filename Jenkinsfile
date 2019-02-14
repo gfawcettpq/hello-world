@@ -2,20 +2,20 @@ pipeline {
   agent none
 
   stages {
-    stage('Build') {
+    stage('pre-build') {
       agent { 
-        docker { image 'busybox' }
+        docker { image 'deployoryah' }
       }
       steps {
-        echo 'Building...'
+        echo 'jeeves inject devops-helloworld-pipeline'
       }
     }
-    stage('Test') {
+    stage('build-image') {
       agent { 
         docker { image 'busybox' }
       }
       steps {
-        echo 'Testing...'
+        echo 'Building Image'
       }
     }
     stage('Deploy') {
@@ -24,6 +24,14 @@ pipeline {
       }
       steps {
         echo 'Deploying...'
+      }
+    }
+    stage('Validate') {
+      agent {
+        docker { image 'busybox' }
+      }
+      steps {
+        echo 'Validating...'
       }
     }
   }

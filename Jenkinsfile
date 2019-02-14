@@ -32,7 +32,7 @@ pipeline {
         }
       }
       steps {
-        sh 'firkin docker login --aws_account pqis --no_email --debug'
+        sh '$(aws ecr get-login --no-include-email)'
         sh 'cd docker/hello_world && docker build --pull -t ${IMAGE_TAG}'
       }
     }

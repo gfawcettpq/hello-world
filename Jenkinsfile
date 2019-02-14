@@ -32,7 +32,7 @@ pipeline {
         }
       }
       steps {
-        sh '$(aws ecr get-login --no-include-email)'
+        sh '$(aws ecr get-login --no-include-email --region us-east-1)'
         sh 'cd docker/hello_world && docker build --pull -t ${IMAGE_TAG}'
       }
     }

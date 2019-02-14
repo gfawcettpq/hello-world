@@ -29,7 +29,7 @@ pipeline {
         }
       }
       steps {
-        sh 'firkin docker login --aws_account pqis --no_email'
+        sh 'firkin docker login --aws_account pqis --no_email --debug'
         sh 'cd docker/hello_world && docker build --pull -t ${IMAGE_TAG}'
       }
     }

@@ -21,7 +21,10 @@ pipeline {
     }
     stage('build-image') {
       agent { 
-        docker { image 'deployoryah' }
+        docker { 
+          image 'deployoryah'
+          args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
       }
       when {
         expression {

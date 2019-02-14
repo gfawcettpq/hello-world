@@ -23,6 +23,11 @@ pipeline {
       agent { 
         docker { image 'deployoryah' }
       }
+      when {
+        expression {
+          currentBuild.result == null || currentBuild.result == 'SUCCESS'
+        }
+      }
       steps {
         sh 'firkin docker login --account pqis'
         sh 'cd docker/hello_world && docker build --pull -t ${IMAGE_TAG}'
@@ -32,6 +37,11 @@ pipeline {
       agent { 
         docker { image 'busybox' }
       }
+      when {
+        expression {
+          currentBuild.result == null || currentBuild.result == 'SUCCESS'
+        }
+      }
       steps {
         echo 'Deploying...'
       }
@@ -39,6 +49,11 @@ pipeline {
     stage('validate') {
       agent {
         docker { image 'busybox' }
+      }
+      when {
+        expression {
+          currentBuild.result == null || currentBuild.result == 'SUCCESS'
+        }
       }
       steps {
         echo 'Validating...'

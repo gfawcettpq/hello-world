@@ -20,19 +20,13 @@ pipeline {
       }
     }
     stage('build-image') {
-      agent { 
-        docker { 
-          image 'deployoryah'
-          args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-      }
+      agent any
       when {
         expression {
           currentBuild.result == null || currentBuild.result == 'SUCCESS'
         }
       }
       steps {
-        sh 'whoami'
         sh '$(aws ecr get-login --no-include-email --region us-east-1)'
         sh 'cd docker/hello_world && docker build --pull -t ${IMAGE_TAG}'
       }

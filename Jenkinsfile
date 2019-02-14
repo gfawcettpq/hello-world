@@ -2,9 +2,9 @@ pipeline {
   agent none
 
   parameters {
-    string(name: 'RELEASE')
-    string(name: 'APPLICATION_REVISION')
-    string(name: 'APPLICATION_BRANCH')
+    string(name: 'RELEASE', description: 'artifact version')
+    string(name: 'APPLICATION_REVISION', description: 'application git commit')
+    string(name: 'APPLICATION_BRANCH', description: 'application git branch')
   }
 
   stages {
@@ -21,11 +21,11 @@ pipeline {
     }
     stage('build-image') {
       agent { 
-        docker { image 'busybox' }
+        docker { image 'deployoryah' }
       }
       steps {
         sh 'firkin docker login --account pqis'
-        sh 'cd docker/hello_world && docker build --pull -t '
+        sh 'cd docker/hello_world && docker build --pull -t ${IMAGE_TAG}'
       }
     }
     stage('deploy') {

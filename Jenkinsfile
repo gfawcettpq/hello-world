@@ -2,9 +2,9 @@ pipeline {
   agent none
 
   parameters {
-    string(name: 'RELEASE', description: 'artifact version')
-    string(name: 'APPLICATION_REVISION', description: 'application git commit')
-    string(name: 'APPLICATION_BRANCH', description: 'application git branch')
+    string(name: 'RELEASE', description: 'artifact version', defaultValue: '1.0.0')
+    string(name: 'APPLICATION_REVISION', description: 'application git commit', defaultValue: 'fakebro')
+    string(name: 'APPLICATION_BRANCH', description: 'application git branch', defaultValue: 'master')
   }
 
   stages {

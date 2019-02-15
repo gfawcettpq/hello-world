@@ -20,7 +20,14 @@ pipeline {
       }
     }
     stage('build-image') {
-      agent any
+      agent {
+        docker {
+          docker {
+            image 'deployoryah'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+          }
+        }
+      }
       when {
         expression {
           currentBuild.result == null || currentBuild.result == 'SUCCESS'

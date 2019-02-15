@@ -27,6 +27,7 @@ pipeline {
         }
       }
       steps {
+        sh 'stat -c "%g" /var/run/docker.sock'
         sh '$(aws ecr get-login --no-include-email --region us-east-1)'
         sh 'cd docker/hello_world && docker build --pull -t ${IMAGE_TAG}'
       }

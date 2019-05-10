@@ -29,8 +29,10 @@ pipeline {
                 }
             }
             steps {
-                sh 'env'
-                sh 'cd ${APPLICATION_NAME} && mkdir -p tmp && rm -f tmp/*.jar'
+                sh 'firkin docker login --account pqis'
+                sh 'cd ${APPLICATION_NAME} && docker build -t ${IMAGE_TAG} .'
+                sh 'firkin create image repository ${IMAGE_TAG}'
+                sh 'docker push ${IMAGE_TAG}'
             }
         }
         stage('deploy') {

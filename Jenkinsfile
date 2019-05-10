@@ -31,7 +31,7 @@ pipeline {
             steps {
                 sh 'firkin docker login --account pqis'
                 sh 'cd ${APPLICATION_NAME} && docker build -t ${IMAGE_TAG} .'
-                sh 'firkin create image repository ${IMAGE_TAG}'
+                sh 'firkin create image repository ${IMAGE_TAG} --idempotent'
                 sh 'docker push ${IMAGE_TAG}'
             }
         }

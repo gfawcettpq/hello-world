@@ -29,6 +29,8 @@ pipeline {
                 }
             }
             steps {
+                sh 'jeeves inject devops-helloworld-pipeline --to_file env.vars'
+                load 'env.vars'
                 sh 'cd ${SERVICE_NAME} && mkdir -p tmp && rm -f tmp/*.jar && aws s3 cp s3://${S3_BUCKET}/${SERVICE_NAME}/artifacts/pqservices-${SERVICE_NAME}-${IVY_BUILD_NUMBER}.jar tmp/pqservices-${SERVICE_NAME}.jar'
             }
         }

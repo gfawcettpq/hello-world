@@ -13,9 +13,11 @@ pipeline {
                 label 'deploy-ec2'
             }
             steps {
-                sh 'jeeves load project devops-helloworld-pipeline helloworld/jenkins/nightly1.yml'
-                sh 'jeeves inject devops-helloworld-pipeline'
-                sh 'jeeves inject devops-helloworld-pipeline --to_file env.vars'
+                sh '''
+jeeves load project devops-helloworld-pipeline helloworld/jenkins/nightly1.yml
+jeeves inject devops-helloworld-pipeline
+jeeves inject devops-helloworld-pipeline --to_file env.vars
+'''
                 load 'env.vars'
             }
         }
@@ -29,10 +31,16 @@ pipeline {
                 }
             }
             steps {
-                sh 'firkin docker login --account pqis'
-                sh 'cd ${APPLICATION_NAME} && docker build -t ${IMAGE_TAG} .'
-                sh 'firkin create image repository ${IMAGE_TAG} --idempotent'
-                sh 'docker push ${IMAGE_TAG}'
+                sh '''
+firkin docker login --account pqis
+
+cd ${APPLICATION_NAME}
+docker build -t ${IMAGE_TAG} .
+
+firkin create image repository ${IMAGE_TAG} --idempotent
+
+docker push ${IMAGE_TAG}
+'''
             }
         }
         stage('deploy') {
@@ -45,7 +53,16 @@ pipeline {
                 }
             }
             steps {
-                echo 'Deploying...'
+                sh '''
+nimbus create stack ${STACK_TEMPLATE} ${APPLICATION_NAME}/jenkins/${ENVIRONMENT}.yml --idempotent --output ${PIPELINE} --apply_tags
+
+jeeves rename parameter RESOURCES.BaseURL SERVICE_URL ${PIPELINE}
+
+firkin register task ${APPLICATION_NAME}/jenkins/${ENVIRONMENT}.yml
+
+TARGET_GROUP_ARN=$(jeeves read parameter RESOURCES.DefaultTargetGroupARN ${PIPELINE})
+firkin poke service ${APPLICATION_NAME}/jenkins/${ENVIRONMENT}.yml --additional_parameters load_balancers.target_group_arn=${TARGET_GROUP_ARN} --idempotent --link_from ${PIPELINE}
+'''
             }
         }
         stage('validate') {

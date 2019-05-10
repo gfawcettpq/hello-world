@@ -76,8 +76,8 @@ firkin poke service ${APPLICATION_NAME}/jenkins/${ENVIRONMENT}.yml --additional_
             }
             steps {
                 sh '''
-SERVICE_URL=$(jeeves read parameter ${PIPELINE} RESOURCES.BaseURL)
-TARGET_GROUP_ARN=$(jeeves read parameter ${PIPELINE} RESOURCES.DefaultTargetGroupARN)
+SERVICE_URL=$(jeeves read parameter RESOURCES.BaseURL ${PIPELINE})
+TARGET_GROUP_ARN=$(jeeves read parameter RESOURCES.DefaultTargetGroupARN ${PIPELINE})
 
 firkin wait for stability ${APPLICATION_NAME}/jenkins/${ENVIRONMENT}.yml
 
@@ -95,7 +95,7 @@ firkin test service ${SERVICE_URL} --test_path cucumber --tags @${APPLICATION_NA
             }
             steps {
                 sh '''
-SERVICE_URL=$(jeeves read parameter ${PIPELINE} RESOURCES.BaseURL)
+SERVICE_URL=$(jeeves read parameter RESOURCES.BaseURL ${PIPELINE})
 STACK_NAME=$(jeeves read parameter STACK_NAME ${PIPELINE})
 
 firkin publish ${IMAGE_TAG} --system ${SYSTEM} --group ${GROUP} --release ${RELEASE} --application_revision ${GIT_COMMIT} --infrastructure_revision ${GIT_COMMIT}

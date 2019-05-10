@@ -76,6 +76,8 @@ firkin poke service ${APPLICATION_NAME}/jenkins/${ENVIRONMENT}.yml --additional_
             }
             steps {
                 sh '''
+#!/bin/bash -l
+
 SERVICE_URL=$(jeeves read parameter RESOURCES.BaseURL ${PIPELINE})
 TARGET_GROUP_ARN=$(jeeves read parameter RESOURCES.DefaultTargetGroupARN ${PIPELINE})
 

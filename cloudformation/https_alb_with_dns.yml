@@ -1,0 +1,320 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS Services CloudFormation Template
+Parameters:
+  ALBScheme:
+    Description: Internal or External
+    Type: String
+  AvailabilityZoneA:
+    Description: Availability Zone A
+    Type: String
+  AvailabilityZoneB:
+    Description: Availability Zone B
+    Type: String
+  BaseURL:
+    Description: Base URL for ALB
+    Type: String
+  Environment:
+    Description: Environment Instances are Configured For
+    Type: String
+  HealthCheckMatcher:
+    Description: range of http response codes indicating success
+    Type: String
+    Default: '200'
+  HealthCheckPath:
+    Description: path to resource for health check
+    Type: String
+    Default: /status?health_only=1
+  HealthCheckType:
+    Description: HTTP or TCP Health Check
+    Type: String
+    Default: HTTP
+  IdleTimeout:
+    Description: Idle Timeout for ALB Connection Settings
+    Type: String
+    Default: '60'
+Mappings:
+  HostedZoneMap:
+    dev:
+      external: dev.proquest.com.
+      internal: dev.int.proquest.com.
+    devl:
+      external: dev.proquest.com.
+      internal: dev.int.proquest.com.
+    nightly:
+      external: dev.proquest.com.
+      internal: dev.int.proquest.com.
+    nightly1:
+      external: dev.proquest.com.
+      internal: dev.int.proquest.com.
+    nightly2:
+      external: dev.proquest.com.
+      internal: dev.int.proquest.com.
+    nightly3:
+      external: dev.proquest.com.
+      internal: dev.int.proquest.com.
+    preprod:
+      external: pre.proquest.com.
+      internal: pre.int.proquest.com.
+    prod:
+      external: prod.proquest.com.
+      internal: prod.int.proquest.com.
+  SecurityGroupIdPrivate0Map:
+    static:
+      sg: sg-6f37dc00
+    devl:
+      sg: sg-6f37dc00
+    dev:
+      sg: sg-6f37dc00
+    nightly:
+      sg: sg-6f37dc00
+    nightly1:
+      sg: sg-6f37dc00
+    nightly2:
+      sg: sg-6f37dc00
+    nightly3:
+      sg: sg-6f37dc00
+    preprod:
+      sg: sg-6f37dc00
+    prod:
+      sg: sg-e3834e8c
+  SubnetIdPrivate0Map:
+    us-east-1a:
+      static: ''
+      devl: subnet-e2da7dba
+      dev: subnet-e2da7dba
+      nightly: subnet-e2da7dba
+      nightly1: subnet-e2da7dba
+      nightly2: subnet-e2da7dba
+      nightly3: subnet-e2da7dba
+      preprod: subnet-e2da7dba
+      prod: subnet-67f41408
+    us-east-1b:
+      prod: subnet-a1f414ce
+    us-east-1c:
+      static: subnet-cc22f0e6
+      devl: subnet-cc22f0e6
+      dev: subnet-cc22f0e6
+      nightly: subnet-cc22f0e6
+      nightly1: subnet-cc22f0e6
+      nightly2: subnet-cc22f0e6
+      nightly3: subnet-cc22f0e6
+      preprod: subnet-cc22f0e6
+      prod: subnet-fcf51593
+    us-east-1d:
+      static: subnet-7fcc4009
+      devl: subnet-7fcc4009
+      dev: subnet-7fcc4009
+      nightly: subnet-7fcc4009
+      nightly1: subnet-7fcc4009
+      nightly2: subnet-7fcc4009
+      nightly3: subnet-7fcc4009
+      preprod: subnet-7fcc4009
+  SecurityGroupIdPublic0Map:
+    static:
+      sg: sg-6e37dc01
+    devl:
+      sg: sg-6e37dc01
+    dev:
+      sg: sg-6e37dc01
+    nightly:
+      sg: sg-6e37dc01
+    nightly1:
+      sg: sg-6e37dc01
+    nightly2:
+      sg: sg-6e37dc01
+    nightly3:
+      sg: sg-6e37dc01
+    preprod:
+      sg: sg-40b91a36
+    prod:
+      sg: sg-eb834e84
+  SubnetIdPublic0Map:
+    us-east-1a:
+      static: subnet-77595c1c
+      devl: subnet-77595c1c
+      dev: subnet-77595c1c
+      nightly: subnet-77595c1c
+      nightly1: subnet-77595c1c
+      nightly2: subnet-77595c1c
+      nightly3: subnet-77595c1c
+      preprod: subnet-77595c1c
+      prod: subnet-4af31325
+    us-east-1b:
+      prod: subnet-5cf41433
+    us-east-1c:
+      static: subnet-3d595c56
+      devl: subnet-3d595c56
+      dev: subnet-3d595c56
+      nightly: subnet-3d595c56
+      nightly1: subnet-3d595c56
+      nightly2: subnet-3d595c56
+      nightly3: subnet-3d595c56
+      preprod: subnet-3d595c56
+      prod: subnet-75f5151a
+    us-east-1d:
+      static: subnet-aa595cc1
+      devl: subnet-aa595cc1
+      dev: subnet-aa595cc1
+      nightly: subnet-aa595cc1
+      nightly1: subnet-aa595cc1
+      nightly2: subnet-aa595cc1
+      nightly3: subnet-aa595cc1
+      preprod: subnet-aa595cc1
+  VpcMap:
+    static:
+      vpc: vpc-6f595c04
+    devl:
+      vpc: vpc-6f595c04
+    dev:
+      vpc: vpc-6f595c04
+    nightly:
+      vpc: vpc-6f595c04
+    nightly1:
+      vpc: vpc-6f595c04
+    nightly2:
+      vpc: vpc-6f595c04
+    nightly3:
+      vpc: vpc-6f595c04
+    preprod:
+      vpc: vpc-6f595c04
+    prod:
+      vpc: vpc-14c08d79
+  CertificateMap:
+    devl:
+      internal: arn:aws:acm:us-east-1:365859773477:certificate/175206aa-cdc0-43a8-8135-4651411fde16
+      external: arn:aws:acm:us-east-1:365859773477:certificate/44e0a0e9-0b5c-47ea-b474-3f7193afe2fc
+    nightly:
+      internal: arn:aws:acm:us-east-1:365859773477:certificate/175206aa-cdc0-43a8-8135-4651411fde16
+      external: arn:aws:acm:us-east-1:365859773477:certificate/44e0a0e9-0b5c-47ea-b474-3f7193afe2fc
+    nightly1:
+      internal: arn:aws:acm:us-east-1:365859773477:certificate/175206aa-cdc0-43a8-8135-4651411fde16
+      external: arn:aws:acm:us-east-1:365859773477:certificate/44e0a0e9-0b5c-47ea-b474-3f7193afe2fc
+    nightly2:
+      internal: arn:aws:acm:us-east-1:365859773477:certificate/175206aa-cdc0-43a8-8135-4651411fde16
+      external: arn:aws:acm:us-east-1:365859773477:certificate/44e0a0e9-0b5c-47ea-b474-3f7193afe2fc
+    nightly3:
+      internal: arn:aws:acm:us-east-1:365859773477:certificate/175206aa-cdc0-43a8-8135-4651411fde16
+      external: arn:aws:acm:us-east-1:365859773477:certificate/44e0a0e9-0b5c-47ea-b474-3f7193afe2fc
+    nightly4:
+      internal: arn:aws:acm:us-east-1:365859773477:certificate/175206aa-cdc0-43a8-8135-4651411fde16
+      external: arn:aws:acm:us-east-1:365859773477:certificate/44e0a0e9-0b5c-47ea-b474-3f7193afe2fc
+    preprod:
+      internal: arn:aws:acm:us-east-1:365859773477:certificate/da279d44-485f-477f-a2cf-4a4179b64eee
+      external: arn:aws:acm:us-east-1:365859773477:certificate/be349f41-7eec-4c85-9789-894e50f7d888
+    prod:
+      internal: arn:aws:acm:us-east-1:518346848341:certificate/574fd72b-c8f2-4c4b-bf37-887405472893
+      external: arn:aws:acm:us-east-1:518346848341:certificate/ad3dcfef-b943-4c07-a0f2-a5b9f90998d7
+Conditions:
+  IsInternalALB: !Equals
+    - !Ref 'ALBScheme'
+    - internal
+  IsHTTPCheck: !Equals
+    - !Ref 'HealthCheckType'
+    - HTTP
+Resources:
+  ALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: !If
+        - IsInternalALB
+        - !Ref 'ALBScheme'
+        - !Ref 'AWS::NoValue'
+      Subnets: !If
+        - IsInternalALB
+        - - !FindInMap
+            - SubnetIdPrivate0Map
+            - !Ref 'AvailabilityZoneA'
+            - !Ref 'Environment'
+          - !FindInMap
+            - SubnetIdPrivate0Map
+            - !Ref 'AvailabilityZoneB'
+            - !Ref 'Environment'
+        - - !FindInMap
+            - SubnetIdPublic0Map
+            - !Ref 'AvailabilityZoneA'
+            - !Ref 'Environment'
+          - !FindInMap
+            - SubnetIdPublic0Map
+            - !Ref 'AvailabilityZoneB'
+            - !Ref 'Environment'
+      LoadBalancerAttributes:
+        - Key: idle_timeout.timeout_seconds
+          Value: !Ref 'IdleTimeout'
+      SecurityGroups: !If
+        - IsInternalALB
+        - - !FindInMap
+            - SecurityGroupIdPrivate0Map
+            - !Ref 'Environment'
+            - sg
+        - - !FindInMap
+            - SecurityGroupIdPublic0Map
+            - !Ref 'Environment'
+            - sg
+  DefaultALBTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: '30'
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: '10'
+      HealthyThresholdCount: '5'
+      UnhealthyThresholdCount: '5'
+      HealthCheckPath: !Ref 'HealthCheckPath'
+      Matcher:
+        HttpCode: !Ref 'HealthCheckMatcher'
+      Port: '80'
+      Protocol: HTTP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: '30'
+      VpcId: !FindInMap
+        - VpcMap
+        - !Ref 'Environment'
+        - vpc
+  DefaultALBListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref 'DefaultALBTargetGroup'
+      LoadBalancerArn: !Ref 'ALB'
+      Port: '80'
+      Protocol: HTTP
+  DefaultALBHTTPSListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref 'DefaultALBTargetGroup'
+      LoadBalancerArn: !Ref 'ALB'
+      Port: '443'
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !FindInMap
+            - CertificateMap
+            - !Ref 'Environment'
+            - !Ref 'ALBScheme'
+  DNS:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneName: !FindInMap
+        - HostedZoneMap
+        - !Ref 'Environment'
+        - !Ref 'ALBScheme'
+      Name: !Ref 'BaseURL'
+      Type: A
+      AliasTarget:
+        HostedZoneId: !GetAtt 'ALB.CanonicalHostedZoneID'
+        DNSName: !GetAtt 'ALB.DNSName'
+Outputs:
+  ALB:
+    Description: Name of ALB Created
+    Value: !Ref 'ALB'
+  DefaultTargetGroupARN:
+    Description: ARN for ALB Target Group
+    Value: !Ref 'DefaultALBTargetGroup'
+  DefaultListenerARN:
+    Description: ARN of Default ALB Listener
+    Value: !Ref 'DefaultALBListener'
+  BaseURL:
+    Description: Base URL for ALB
+    Value: !Ref 'DNS'

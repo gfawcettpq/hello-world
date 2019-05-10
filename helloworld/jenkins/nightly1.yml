@@ -15,7 +15,7 @@ constants:
   region: &region us-east-1
   s3_bucket: &s3_bucket pq-devops
   service_name: &service_name helloworld
-  stack_template: &stack_template docker/cloudformation/https_alb_with_dns.json
+  stack_template: &stack_template cloudformation/https_alb_with_dns.yml
   sub_environment: &sub_environment nightly1
   system: &system devops.helloworld.webapp
   task_name: &task_name helloworld

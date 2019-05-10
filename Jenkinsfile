@@ -75,7 +75,18 @@ firkin poke service ${APPLICATION_NAME}/jenkins/${ENVIRONMENT}.yml --additional_
                 }
             }
             steps {
-                echo 'Validating...'
+                sh '''
+SERVICE_URL=$(jeeves read parameter ${PIPELINE} RESOURCES.BaseURL)
+TARGET_GROUP_ARN=$(jeeves read parameter ${PIPELINE} RESOURCES.DefaultTargetGroupARN)
+
+firkin wait for stability ${APPLICATION_NAME}/jenkins/${ENVIRONMENT}.yml
+
+firkin wait for target health --target_group_arn ${TARGET_GROUP_ARN}
+
+kixx validate ${SERVICE_URL}
+
+firkin test service ${SERVICE_URL} --test_path cucumber --tags @${APPLICATION_NAME}
+'''
             }
         }
         stage('publish') {
@@ -83,7 +94,19 @@ firkin poke service ${APPLICATION_NAME}/jenkins/${ENVIRONMENT}.yml --additional_
                 label 'deploy-ec2'
             }
             steps {
-                echo 'Publishing...'
+                sh '''
+SERVICE_URL=$(jeeves read parameter ${PIPELINE} RESOURCES.BaseURL)
+STACK_NAME=$(jeeves read parameter STACK_NAME ${PIPELINE})
+
+firkin publish ${IMAGE_TAG} --system ${SYSTEM} --group ${GROUP} --release ${RELEASE} --application_revision ${GIT_COMMIT} --infrastructure_revision ${GIT_COMMIT}
+firkin activate ${IMAGE_TAG} ${ENVIRONMENT}
+
+nimbus publish --stack_name ${STACK_NAME} --system ${SYSTEM} --environment ${ENVIRONMENT} --sub_environment ${SUB_ENVIRONMENT} --launch_ami_id ${IMAGE_TAG} --release ${RELEASE} --stack_url ${SERVICE_URL}
+nimbus activate --stack_name ${STACK_NAME}
+nimbus cleanup --stack_name ${STACK_NAME}
+nimbus complete deployment --stack_name ${STACK_NAME}
+
+'''
             }
         }
     }

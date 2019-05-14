@@ -2,7 +2,7 @@ FROM nginx
 
 RUN mkdir /app
 
-COPY helloworld.tar.gz /app
+COPY tmp/helloworld.tar.gz /app
 
 RUN cd /app && \
 tar xvzf helloworld.tar.gz

@@ -10,7 +10,7 @@ defaultECSDeploymentPipeline([
         script: '''
 rm -rf helloworld/dist
 mkdir -p helloworld/dist
-tar czvf helloworld/dist/helloworld-${RELEASE}.tar.gz helloworld/src
+tar czvf helloworld/dist/helloworld-${RELEASE}.tar.gz -C helloworld/src .
 ''',
     ],
     artifact: [

@@ -8,8 +8,9 @@ defaultECSDeploymentPipeline([
         targetPath: 'helloworld/dist',
         targetName: 'helloworld-${RELEASE}.tar.gz',
         script: '''
-cd ${APPLICATION_NAME}
-tar czvf dist/helloworld-${RELEASE}.tar.gz src
+rm -rf helloworld/dist
+mkdir -p helloworld/dist
+tar czvf helloworld/dist/helloworld-${RELEASE}.tar.gz helloworld/src
 ''',
     ],
     artifact: [
